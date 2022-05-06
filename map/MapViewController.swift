@@ -1,7 +1,7 @@
 //
 //  MapViewController.swift
 //  map
-//  最初の検索半径決定画面
+//  検索条件入力画面
 //  Created by user on 2022/04/23.
 //
 
@@ -22,7 +22,7 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
     var s_longitude: String?     //Optional String型経度プロパティ
     
     var c_center = CLLocationCoordinate2DMake(35.681236,139.767125) //円の中心座標
-    var c_radius = CLLocationDistance(1000) //円の半径の初期値
+    var c_radius = CLLocationDistance(1000)                         //円の半径の初期値
     
     var c_radius_0 = CLLocationDistance(300)                         //円の半径 300m
     var c_radius_1 = CLLocationDistance(500)                         //円の半径 500m
@@ -31,13 +31,12 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
     var c_radius_4 = CLLocationDistance(3000)                        //円の半径 3km
     var mkCircle = MKCircle(center: CLLocationCoordinate2DMake(35.681236,139.767125), radius: CLLocationDistance(1000)) //円
     
-    var methodCount: Int = 0
-    var isFirst: Bool = false
+    var isFirst: Bool = false       //地図の中心位置更新フラグ
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.title = "半径を設定してください"                             //ナビゲーションコントローラのタイトル設定
+        navigationItem.title = "半径を設定してください"        //ナビゲーションコントローラのタイトル設定
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "戻る", style: .plain, target: nil, action: nil)    //戻るボタンのテキスト設定
         
         //地図の設定
@@ -56,10 +55,10 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
         }
         
         //円を描画する
-        c_radius = c_radius_2   //初期設定は1km半径
+        c_radius = c_radius_2                       //初期設定は半径1km
         UserDefaults.standard.set(2, forKey: "rad") //UserDefaultsに半径を保存
-        mkCircle = MKCircle(center: c_center, radius: c_radius)
-        mapView.addOverlay(mkCircle)    //mapViewにcircleを追加
+        mkCircle = MKCircle(center: c_center, radius: c_radius) //円の中心座標と半径を設定
+        mapView.addOverlay(mkCircle)    //地図にcircleを追加
     }
     
     //現在地を取得する許可を求めるためのメソッド
@@ -86,19 +85,19 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
         switch sender.selectedSegmentIndex {
                 case 0:
                     c_radius = c_radius_0   //300m
-                    UserDefaults.standard.set(0, forKey: "rad") //UserDefaultsに半径を保存
+                    UserDefaults.standard.set(1, forKey: "rad") //UserDefaultsに半径を保存
                 case 1:
                     c_radius = c_radius_1   //500m
-                    UserDefaults.standard.set(1, forKey: "rad") //UserDefaultsに半径を保存
+                    UserDefaults.standard.set(2, forKey: "rad")
                 case 2:
                     c_radius = c_radius_2   //1km
-                    UserDefaults.standard.set(2, forKey: "rad") //UserDefaultsに半径を保存
+                    UserDefaults.standard.set(3, forKey: "rad")
                 case 3:
                     c_radius = c_radius_3   //2km
-                    UserDefaults.standard.set(3, forKey: "rad") //UserDefaultsに半径を保存
+                    UserDefaults.standard.set(4, forKey: "rad")
                 case 4:
                     c_radius = c_radius_4   //3km
-                    UserDefaults.standard.set(4, forKey: "rad") //UserDefaultsに半径を保存
+                    UserDefaults.standard.set(5, forKey: "rad")
                 default:
                     print("存在しない番号")
                 }
@@ -107,11 +106,9 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
         mapView.addOverlay(mkCircle)                            //円の描画
     }
     
-    //緯度経度
+    //現在地
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 
-        methodCount += 1
-        print(methodCount)
         s_latitude = (locations.last?.coordinate.latitude.description)  //緯度取得
         s_longitude = (locations.last?.coordinate.longitude.description)//経度取得
         
@@ -129,7 +126,6 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
             isFirst = true
         }
         mapView.removeOverlay(mkCircle)                             //現在の円を消す
-        //print("\(latitude),\(longitude)")
         c_center = CLLocationCoordinate2DMake(latitude,longitude)   //中心座標更新
         mkCircle = MKCircle(center: c_center, radius: c_radius)     //中心座標と半径を更新
         mapView.addOverlay(mkCircle)                                //円の描画
@@ -146,15 +142,5 @@ class MapViewController: UIViewController,CLLocationManagerDelegate,MKMapViewDel
 
            return myCircleView
        }
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
